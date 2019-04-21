@@ -11,8 +11,8 @@ header("Content-type: text/xml");
 //
 //KONFIGURACJA
 //
-const clientID = 'tutaj wpisz clientID';
-const clientSECRET = 'tutaj wpisz clientSecret';
+const clientID = 'nope';
+const clientSECRET = 'nope';
 const tokenFILE = 'token.json';
 const offerLIMIT = '100'; //Maximum is 120x100 = 12000 offers
 //
@@ -24,8 +24,8 @@ $searchPhrase = null;
 $excludePhrase = null;
 $searchMode = null;
 $categoryId = null;
-$priceFrom = null;
-$priceTo = null;
+$price_from = null;
+$price_to = null;
 $offerType = null;
 $sellerId = null;
 $offerCondition = null;
@@ -61,16 +61,16 @@ if (isset($_GET['sellerId'])) {
     $sellerId = $_GET['sellerId'];
 }
 
-if ((isset($_GET['priceFrom']) && is_numeric($_GET['priceFrom'])) || (isset($_GET['priceTo']) && is_numeric($_GET['priceTo']))) {
+if ((isset($_GET['price_from']) && is_numeric($_GET['price_from'])) || (isset($_GET['price_to']) && is_numeric($_GET['price_to']))) {
     
-    if (isset($_GET['priceFrom']) && is_numeric($_GET['priceFrom'])) {
+    if (isset($_GET['price_from']) && is_numeric($_GET['price_from'])) {
         
-        $priceFrom = $_GET['priceFrom'];
+        $price_from = $_GET['price_from'];
     }
     
-    if (isset($_GET['priceTo']) && is_numeric($_GET['priceTo'])) {
+    if (isset($_GET['price_to']) && is_numeric($_GET['price_to'])) {
         
-        $priceTo = $_GET['priceTo'];
+        $price_to = $_GET['price_to'];
     }
 }
 
@@ -138,7 +138,7 @@ else {
     $rssFooter .= "</rss>";
     
     echo $rssHeader;
-    echo $priceTo;
+    echo $price_to;
     for ($i = 0; $i < $stepCounter; $i++) {
         $queryOffset = $i == 0 ? 0 : 100 * $i + 1; 
         if ($offerCounter > $queryOffset) {
@@ -154,8 +154,8 @@ else {
                 'phrase' => $searchPhrase . $excludePhrase,
                 'category.id' => $categoryId,
                 'seller.id' => $sellerId,
-                'price.from' => $priceFrom,
-                'price.to' => $priceTo,
+                'price.from' => $price_from,
+                'price.to' => $price_to,
                 'parameter.11323' => $offerCondition
             );
             
@@ -248,10 +248,11 @@ function getOfferData($offerObject, $offerPromoted = 0, $printLineSeparator = "<
     $path = substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], "/"));
     $rss = "";
     for ($i = 0; $i < count($offerObject); $i++) {
+        $offerSellingMode = $offerObject[$i]->sellingMode;
         $rss .= "<item>\n";
         $rss .=  "<title>";
         $rss .= $offerPromoted == 1 ? "(PROMOWANE) " : "";
-        $rss .= htmlspecialchars($offerObject[$i]->name) . "</title>\n";
+        $rss .= htmlspecialchars($offerObject[$i]->name) . " - "  . (float)$offerSellingMode->price->amount . "zł" . "</title>\n";
         $rss .=  "<link>https://allegro.pl/i" . $offerObject[$i]->id . ".html</link>\n";
         $rss .=  "<description><![CDATA[\n";
         if (count($offerObject[$i]->images) > 0) {
